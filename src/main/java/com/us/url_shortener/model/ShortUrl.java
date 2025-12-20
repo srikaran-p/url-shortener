@@ -20,6 +20,8 @@ public class ShortUrl {
     @Column(nullable = false, length = 2048)
     private String longUrl;
 
+    private Long expirationTime;
+
     public UUID getId() {
         return id;
     }
@@ -42,5 +44,13 @@ public class ShortUrl {
 
     public void setLongUrl(String longUrl) {
         this.longUrl = longUrl;
+    }
+
+    public Long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Long expirationTime) {
+        this.expirationTime = expirationTime;
     }
 }

@@ -7,6 +7,7 @@ public class CreateShortUrlResponse {
     private UUID id;
     private String longUrl;
     private String shortCode;
+    private Long expirationTime;
 
     public UUID getId() {
         return id;
@@ -30,5 +31,13 @@ public class CreateShortUrlResponse {
 
     public void setShortCode(String shortCode) {
         this.shortCode = shortCode;
+    }
+
+    public Long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Long expirationTime) {
+        this.expirationTime = expirationTime;
     }
 }

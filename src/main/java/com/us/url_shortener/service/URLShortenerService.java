@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.util.Optional;
+
 @Service
 public class URLShortenerService {
 
@@ -31,10 +34,17 @@ public class URLShortenerService {
     }
 
     public String getLongUrl(String shortCode) {
-        return shortUrlRepository.findByShortCode(shortCode)
-                                 .map(ShortUrl::getLongUrl)
-                                 .orElseThrow(() -> new ResponseStatusException(
-                                         HttpStatus.NOT_FOUND, "Short Url not found")
-                                 );
+        final Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByShortCode(shortCode);
+        if (shortUrlOptional.isPresent()) {
+            final ShortUrl shortUrl = shortUrlOptional.get();
+            final long now = Instant.now().toEpochMilli();
+            if (now < shortUrl.getExpirationTime()) {
+                return shortUrl.getLongUrl();
+            } else {
+                throw new ResponseStatusException(HttpStatus.GONE, "Short Url expired");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Short Url not found");
+        }
     }
 }
