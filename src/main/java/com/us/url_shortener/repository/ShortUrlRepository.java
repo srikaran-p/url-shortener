@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface ShortUrlRepository extends JpaRepository<ShortUrl, UUID> {
 
     Optional<ShortUrl> findByShortCode(String shortCode);
+
+    void deleteByShortCode(String shortCode);
 }

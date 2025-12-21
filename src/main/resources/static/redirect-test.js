@@ -8,7 +8,7 @@ export const options = {
 
 // k6 run redirect-test.js
 export default function () {
-    const url = 'http://localhost:4000/urls/4d95b5d8';
+    const url = 'http://localhost:4000/urls/8010fe38';
 
     const res = http.get(url, {
         redirects: 0,

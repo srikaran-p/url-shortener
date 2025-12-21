@@ -5,6 +5,9 @@ import com.us.url_shortener.dto.CreateShortUrlRequest;
 import com.us.url_shortener.dto.CreateShortUrlResponse;
 import com.us.url_shortener.model.ShortUrl;
 import com.us.url_shortener.repository.ShortUrlRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,7 @@ public class URLShortenerService {
         return ShortUrlAdapter.toCreateResponse(newShortUrl);
     }
 
+    @Cacheable(value = "longUrlCache", key = "#shortCode")
     public String getLongUrl(String shortCode) {
         final Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByShortCode(shortCode);
         if (shortUrlOptional.isPresent()) {
@@ -46,5 +50,10 @@ public class URLShortenerService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Short Url not found");
         }
+    }
+
+    @CacheEvict(value = "longUrlCache", key = "#shortCode")
+    public void deleteLongUrlByShortCode(String shortCode) {
+        shortUrlRepository.deleteByShortCode(shortCode);
     }
 }
