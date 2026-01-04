@@ -21,7 +21,6 @@ public class ShortUrlAdapter {
 
         final ShortUrl shortUrl = new ShortUrl();
         shortUrl.setLongUrl(longUrl);
-        shortUrl.setShortCode(createShortUrl(longUrl));
 
         final Long expirationTime = getExpirationTime();
         shortUrl.setExpirationTime(expirationTime);
@@ -41,12 +40,6 @@ public class ShortUrlAdapter {
         createShortUrlResponse.setExpirationTime(shortUrl.getExpirationTime());
 
         return createShortUrlResponse;
-    }
-
-    private static String createShortUrl(String longUrl) {
-        // Write the complex logic here later lol
-
-        return UUID.randomUUID().toString().substring(0, 8);
     }
 
     private static Long getExpirationTime() {

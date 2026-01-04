@@ -3,6 +3,7 @@ package com.us.url_shortener.service;
 import com.us.url_shortener.adapter.ShortUrlAdapter;
 import com.us.url_shortener.dto.CreateShortUrlRequest;
 import com.us.url_shortener.dto.CreateShortUrlResponse;
+import com.us.url_shortener.dto.ShortCodeSequenceDAO;
 import com.us.url_shortener.model.ShortUrl;
 import com.us.url_shortener.repository.ShortUrlRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -12,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import util.Base10Encoder;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -20,20 +22,31 @@ import java.util.Optional;
 public class URLShortenerService {
 
     private final ShortUrlRepository shortUrlRepository;
+    private final ShortCodeSequenceDAO shortCodeSequenceDAO;
 
-    public URLShortenerService(ShortUrlRepository shortUrlRepository) {
+    public URLShortenerService(ShortUrlRepository shortUrlRepository, ShortCodeSequenceDAO shortCodeSequenceDAO) {
         this.shortUrlRepository = shortUrlRepository;
+        this.shortCodeSequenceDAO = shortCodeSequenceDAO;
     }
 
+    // CREATE SEQUENCE short_code_seq START WITH 1 INCREMENT BY 1;
     public CreateShortUrlResponse shorten(CreateShortUrlRequest createShortUrlRequest) {
-        ShortUrl newShortUrl = null;
+        long counter = shortCodeSequenceDAO.getNext();
+        System.out.println("Counter: " + counter);
+        String shortCode = Base10Encoder.BASE_62.encode(counter);
+        System.out.println("ShortCode: " + shortCode);
+
+        ShortUrl newShortUrl = ShortUrlAdapter.toShortUrl(createShortUrlRequest);
+        newShortUrl.setShortCode(shortCode);
+
+        ShortUrl saved = null;
         try {
-            newShortUrl = shortUrlRepository.save(ShortUrlAdapter.toShortUrl(createShortUrlRequest));
+            saved = shortUrlRepository.save(newShortUrl);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Short code collision");
+            throw new RuntimeException("Short code collision", e);
         }
 
-        return ShortUrlAdapter.toCreateResponse(newShortUrl);
+        return ShortUrlAdapter.toCreateResponse(saved);
     }
 
     @Cacheable(value = "longUrlCache", key = "#shortCode")
